@@ -1,0 +1,50 @@
+---
+title: "HW 2 Data Science"
+author: "Victoria Mello (vsm2118)"
+date: "October 4, 2023"
+output: github_document
+---
+# Promblem 1
+
+```{r}
+## Load tidyverse
+
+library(tidyverse)
+
+## Cleaning the pols_month dataset
+
+pols_month <- read.csv("data/pols-month.csv")
+
+cleaned_pols <- pols_month %>% 
+  separate(mon, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(month = month.abb[as.integer(month)]) %>%
+  mutate(president = ifelse(prez_gop == 1, "gop", "dem")) %>% 
+  select(-prez_dem, -prez_gop, -day)
+View(cleaned_pols)
+
+## Cleaning the snp dataset
+
+snp <- read.csv("data/snp.csv")
+
+cleaned_snp <- snp %>%
+  separate(date, into = c("year", "month"), sep = "-") %>%
+  arrange(year, month) %>%
+  select(year, month, everything())
+View(cleaned_snp)
+
+## Tidying the unemployment dataset
+
+unemployment <- read.csv("data/unemployment.csv")
+tidy_unemployment <- unemployment %>%
+  pivot_longer(cols = -Year, names_to = "Month", values_to = "UnemploymentRate") %>%
+  rename(year = Year)
+View(tidy_unemployment)
+
+```
+
+```{r}
+## Merging the Datasets 
+
+
+```
+
