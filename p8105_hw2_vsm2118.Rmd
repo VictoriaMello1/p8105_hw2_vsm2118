@@ -7,44 +7,60 @@ output: github_document
 # Promblem 1
 
 ```{r}
-## Load tidyverse
-
 library(tidyverse)
-
-## Cleaning the pols_month dataset
-
-pols_month <- read.csv("data/pols-month.csv")
-
-cleaned_pols <- pols_month %>% 
-  separate(mon, into = c("year", "month", "day"), sep = "-") %>% 
-  mutate(month = month.abb[as.integer(month)]) %>%
-  mutate(president = ifelse(prez_gop == 1, "gop", "dem")) %>% 
-  select(-prez_dem, -prez_gop, -day)
-View(cleaned_pols)
-
-## Cleaning the snp dataset
-
-snp <- read.csv("data/snp.csv")
-
-cleaned_snp <- snp %>%
-  separate(date, into = c("year", "month"), sep = "-") %>%
-  arrange(year, month) %>%
-  select(year, month, everything())
-View(cleaned_snp)
-
-## Tidying the unemployment dataset
-
-unemployment <- read.csv("data/unemployment.csv")
-tidy_unemployment <- unemployment %>%
-  pivot_longer(cols = -Year, names_to = "Month", values_to = "UnemploymentRate") %>%
-  rename(year = Year)
-View(tidy_unemployment)
-
 ```
 
-```{r}
-## Merging the Datasets 
+Clean and tidy the datasets: 
 
+```{r clean_538_pols}
+month_df = 
+  tibble(
+    month_num = 1:12,
+    month_abb = month.abb,
+    month = month.name)
 
+pols = 
+  read_csv("./data/pols-month.csv") |>
+  separate(mon, into = c("year", "month_num", "day"), convert = TRUE) |>
+  mutate(
+    president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop")) |>
+  left_join(x = _, y = month_df) |> 
+  select(year, month, everything(), -day, -starts_with("prez")) 
 ```
+
+```{r clean_538_snp}
+snp = 
+  read_csv("./data/snp.csv") |>
+  separate(date, into = c("month", "day", "year"), convert = TRUE) |>
+  arrange(year, month) |>
+  mutate(month = month.name[month]) |>
+  select(year, month, close) 
+```
+
+```{r clean_538_unemp}
+unemployment = 
+  read_csv("./data/unemployment.csv") |>
+  rename(year = Year) |>
+  pivot_longer(
+    Jan:Dec, 
+    names_to = "month_abb",
+    values_to = "unemployment"
+  ) |> 
+  left_join(x = _, y = month_df) |> 
+  select(year, month, unemployment)
+```
+
+Now we merge the three datasets!
+
+```{r merge_538}
+data_538 = 
+  left_join(pols, snp) |>
+  left_join(x = _, y = unemployment)
+
+str(data_538)
+```
+
+Notice that there are some `NA` values in the `close` and `unemployment` variables, which indicate that the value of these variables is missing at those locations.
+
+Let's talk about the 538 datasets. The `pols` data has `r nrow(pols)` observations and `r ncol(pols)` variables and tells us about the party affiliation distribution (democrat or republican) for governors and senators for a given year from years `r range(pols$year)[1]` to `r range(pols$year)[2]`. It also tells us whether the sitting president was a democrat or republican. The `snp` data has `r nrow(snp)` observations and `r ncol(snp)` variables, ranging from years `r range(snp$year)[1]` to `r range(snp$year)[2]`. The `unemployment` data has `r nrow(unemployment)` observations and `r ncol(unemployment)` variables ranging from years `r range(unemployment$year)[1]` to `r range(unemployment$year)[2]`. In Januarys in or after 1975 in which a democrat was president, the **average unemployment rate was `r filter(data_538, month == "January", year >= 1975, president == "dem") |> pull(unemployment) |> mean() |> round(2)`**.  The average unemployment rate over the same time period in which a republican was president was `r filter(data_538, month == "January", year >= 1975, president == "gop") |> pull(unemployment) |> mean() |> round(2)`.
 
