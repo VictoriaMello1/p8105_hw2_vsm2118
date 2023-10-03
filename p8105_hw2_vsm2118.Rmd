@@ -69,7 +69,7 @@ The `pols` data has `r nrow(pols)` observations and `r ncol(pols)` variables and
 ```{r}
 
 # Step 1: Read and clean the Mr. Trash Wheel dataset
-mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Wheel") %>%
+mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N586") %>%
   janitor::clean_names() %>%
  mutate(homes_powered=(
     (weight_tons*500)/1000),
@@ -79,7 +79,7 @@ mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Whe
 view(mr_trash_wheel)
 
 # Step 2: Import, clean, and organize data for Professor Trash Wheel
-professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Professor Trash Wheel") %>%
+professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Professor Trash Wheel", range = "A2:M108") %>%
    janitor::clean_names() %>% 
 mutate(homes_powered=(
     (weight_tons*500)/1000),
@@ -89,7 +89,7 @@ mutate(homes_powered=(
 view(professor_trash_wheel)
 
 # Step 3: Import, clean, and organize data for Gwynnda
-gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel") %>%
+gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel", range = "A2:L157") %>%
   janitor::clean_names() %>% 
 mutate(homes_powered=(
     (weight_tons*500)/1000),
