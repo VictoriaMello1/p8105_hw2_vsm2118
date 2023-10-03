@@ -159,7 +159,6 @@ mci_amyloid <- mci_amyloid %>%
 ```
 
 ```{r}
-
 # Clean and tidy the demographic dataset
 demographics_clean <- MCI_baseline %>%
   filter(!is.na(Age_Onset_MCI)) %>%
@@ -168,7 +167,10 @@ demographics_clean <- MCI_baseline %>%
 
 # Calculate the number of participants and those who develop MCI
 num_participants <- nrow(demographics_clean)
+num_participants
+
 num_mci <- sum(!is.na(demographics_clean$Age_Onset_MCI))
+num_mci
 
 # Convert "." to NA in the Age column
 demographics_clean$Age <- ifelse(demographics_clean$Age == ".", NA, demographics_clean$Age)
@@ -178,10 +180,35 @@ demographics_clean <- demographics_clean %>%
 
 # Calculate the average baseline age
 avg_baseline_age <- mean(demographics_clean$Age, na.rm = TRUE)
+avg_baseline_age
 
 # Calculate the proportion of female APOE4 carriers
 female_apoe4 <- demographics_clean$APOE4[demographics_clean$Gender == 1]
 prop_women_apoe4 <- sum(female_apoe4 == 1) / length(female_apoe4)
+prop_women_apoe4
+
+```
+
+```{r}
+# Clean and tidy the biomarker dataset
+mci_amyloid_clean <- mci_amyloid %>%
+  gather(key = "Time", value = "Amyloid_Value", Time_Elapsed:Time8)
+
+# Check for participants that appear in only one of the datasets
+participants_demographic <- unique(demographics_clean$ID)
+participants_amyloid <- unique(mci_amyloid_clean$ID)
+participants_only_demographic <- setdiff(participants_demographic, participants_amyloid)
+participants_only_amyloid <- setdiff(participants_amyloid, participants_demographic)
+
+print(participants_only_demographic)
+print(participants_only_amyloid)
+
+# Combine the demographic and biomarker datasets
+combined_data <- demographics_clean %>%
+  inner_join(mci_amyloid_clean, by = "ID")
+
+# Export the resulting dataset as a CSV file
+write_csv(combined_data, "./combined_data.csv")
 
 ```
 
