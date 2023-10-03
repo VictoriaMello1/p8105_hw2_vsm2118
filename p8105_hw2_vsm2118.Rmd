@@ -131,5 +131,34 @@ The resulting dataset has `r nrow(combined_data)` observations and `r ncol(combi
 
 ```{r}
 
+# Read the datasets
+MCI_baseline <- read_csv("./data_mci/MCI_baseline.csv")
+mci_amyloid <- read_csv("./data_mci/mci_amyloid.csv")
+
+# Rename columns 
+MCI_baseline <- MCI_baseline %>%
+  rename(
+    `ID` = "...1",
+    `Age` = "Age at the study baseline",
+    `Gender` = "1 = Male, 0 = Female",
+    `Education` = "Years of education",
+    `APOE4` = "1 = APOE4 carrier, 0 = APOE4 non-carrier",
+    `Age_Onset_MCI` = "Age at the onset of MCI; missing if a subject remains MCI free during the follow-up period"
+  )
+
+mci_amyloid <- mci_amyloid %>%
+  rename(
+    `ID` = "Study ID",
+    `Time_Elapsed` = "Time (in years) elapsed since the study baseline to the visit where biomarker Amyloid _ 42/40 ratio was measured",
+    `Time2` = "NA...3",
+    `Time4` = "NA...4",
+    `Time6` = "NA...5",
+    `Time8` = "NA...6"
+  )
+
+```
+
+```{r}
+
 ```
 
