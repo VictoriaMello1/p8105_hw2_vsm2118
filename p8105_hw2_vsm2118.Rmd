@@ -72,22 +72,27 @@ mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Whe
   rename(
     Weight_tons = `Weight (tons)`,
     Cigarette_Butts = `Cigarette Butts`,
-    Homes_Powered = `Homes Powered*`
   ) %>%
   filter(!is.na(Dumpster)) %>%
   mutate(Month = tolower(Month))  # Convert month names to lowercase
 
+mr_trash_wheel <- mr_trash_wheel %>%
+  mutate(homes_powered = (Weight_tons * 1000) / 500 / 30)
+
 view(mr_trash_wheel)
+
 # Step 2: Import, clean, and organize data for Professor Trash Wheel
 professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Professor Trash Wheel") %>%
-  select(Dumpster, Month, Year, Date, `Weight (tons)`, `Cigarette Butts`, `Homes Powered*`) %>%
+  select(Dumpster, Month, Year, Date, `Weight (tons)`, `Cigarette Butts`) %>%
   rename(
     Weight_tons = `Weight (tons)`,
-    Cigarette_Butts = `Cigarette Butts`,
-    Homes_Powered = `Homes Powered*`
+    Cigarette_Butts = `Cigarette Butts`
   ) %>%
   filter(!is.na(Dumpster)) %>%
   mutate(Month = tolower(Month), Trash_Wheel = "Professor Trash Wheel")
+
+professor_trash_wheel <- professor_trash_wheel %>%
+  mutate(homes_powered = (Weight_tons * 1000) / 500 / 30)
 
 view(professor_trash_wheel)
 
@@ -101,6 +106,9 @@ gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel"
   ) %>%
   filter(!is.na(Dumpster)) %>%
   mutate(Month = tolower(Month), Trash_Wheel = "Gwynnda")
+
+gwynnda <- gwynnda %>%
+  mutate(homes_powered = (Weight_tons * 1000) / 500 / 30)
 
 view(gwynnda)
 ```
