@@ -70,61 +70,48 @@ The `pols` data has `r nrow(pols)` observations and `r ncol(pols)` variables and
 
 # Step 1: Read and clean the Mr. Trash Wheel dataset
 mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Wheel") %>%
-  select(Dumpster, Month, Year, Date, `Weight (tons)`, `Cigarette Butts`, `Homes Powered*`) %>%
-  rename(
-    Weight_tons = `Weight (tons)`,
-    Cigarette_Butts = `Cigarette Butts`,
-  ) %>%
-  filter(!is.na(Dumpster)) %>%
-  mutate(Month = tolower(Month))  
+  janitor::clean_names() %>%
+ mutate(homes_powered=(
+    (weight_tons*500)/1000),
+    year = as.integer(year),
+    trash_data = "mr_tw") 
 
-mr_trash_wheel <- mr_trash_wheel %>%
-  mutate(
-    Year = as.integer(Year),
-    homes_powered = (Weight_tons * 500) / 1000)
 view(mr_trash_wheel)
 
 # Step 2: Import, clean, and organize data for Professor Trash Wheel
 professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Professor Trash Wheel") %>%
-  select(Dumpster, Month, Year, Date, `Weight (tons)`, `Cigarette Butts`) %>%
-  rename(
-    Weight_tons = `Weight (tons)`,
-    Cigarette_Butts = `Cigarette Butts`
-  ) %>%
-  filter(!is.na(Dumpster)) %>%
-  mutate(Month = tolower(Month), Trash_Wheel = "Professor Trash Wheel")
+   janitor::clean_names() %>% 
+mutate(homes_powered=(
+    (weight_tons*500)/1000),
+    year = as.integer(year),
+    trash_data = "professor_tw")
 
-professor_trash_wheel <- professor_trash_wheel %>%
-  mutate(
-    Year = as.integer(Year),
-    homes_powered = (Weight_tons * 500) / 1000)
 view(professor_trash_wheel)
 
 # Step 3: Import, clean, and organize data for Gwynnda
 gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel") %>%
-  select(Dumpster, Month, Year, Date, `Weight (tons)`, `Cigarette Butts`, `Homes Powered*`) %>%
-  rename(
-    Weight_tons = `Weight (tons)`,
-    Cigarette_Butts = `Cigarette Butts`,
-    Homes_Powered = `Homes Powered*`
-  ) %>%
-  filter(!is.na(Dumpster)) %>%
-  mutate(Month = tolower(Month), Trash_Wheel = "Gwynnda")
+  janitor::clean_names() %>% 
+mutate(homes_powered=(
+    (weight_tons*500)/1000),
+    year = as.integer(year),
+    trash_data = "gwynnda_tw")
 
-gwynnda <- gwynnda %>%
-  mutate(
-    Year = as.integer(Year),
-    homes_powered = (Weight_tons * 500) / 1000)
 view(gwynnda)
+
+gwynnda_july_2021 =
+  gwynnda %>% 
+  filter(month == "July") %>% 
+  filter(year == "2021")
 ```
 
 ```{r}
 # Step 4: Combine the datasets
-combined_data <- bind_rows(mr_trash_wheel, professor_trash_wheel, gwynnda)
+combined_data <- bind_rows(mr_trash_wheel, professor_trash_wheel, gwynnda) %>% 
+  janitor::clean_names()
 view(combined_data)
 ```
 
-The resulting dataset has `r nrow(combined_data)` observations and `r ncol(combined_data)` variables, covering the years `r range(combined_data$Year)[1]` to `r range(combined_data$Year)[2]`. This dataset combines data from Mr. Trash Wheel, Professor Trash Wheel, and Gwynnda and includes key variables such as weight of trash collected in tons, number of cigarette butts, and homes powered where each ton of trash equates to on average 500 kilowatts of electricity. For available data, the total weight of trash collected by Professor Trash Wheel is `r sum(professor_trash_wheel$weight)` and the total number of cigarette butts collected by Gwynnda in July of 2021 is `r sum(gwynnda$cigarette_butts[gwynnda$month == "July"])`.
+The collection of Mr. Trash Wheel datasets contains information about a water-wheel vessel that removes trash from the Inner Harbor in Baltimore, Maryland. This dataset combines data from Mr. Trash Wheel, Professor Trash Wheel, and Gwynnda and has `r nrow(combined_data)` observations and `r ncol(combined_data)` variables. The dataset contains information from the years `r range(combined_data$year)[1]` to `r range(combined_data$year)[2]` and includes key variables such as weight of trash collected in tons, number of cigarette butts, and homes powered where each ton of trash equates to on average 500 kilowatts of electricity. For available data, the total weight of trash collected by Professor Trash Wheel is `r sum(pull(professor_trash_wheel, weight_tons))` and the total number of cigarette butts collected by Gwynnda in July of 2021 is `r sum(pull(gwynnda_july_2021, cigarette_butts))`.
 
 
 # Problem 3
@@ -161,7 +148,7 @@ mci_amyloid <- mci_amyloid %>%
 ```{r}
 # Clean and tidy the demographic dataset
 demographics_clean <- MCI_baseline %>%
-  filter(!is.na(Age_Onset_MCI)) %>%
+  filter(Age_Onset_MCI != ".") %>%
   mutate(Gender = as.factor(Gender),
          APOE4 = as.factor(APOE4))
 
