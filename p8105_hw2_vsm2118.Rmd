@@ -60,7 +60,7 @@ data_538 =
 str(data_538)
 ```
 
-Let's talk about the 538 datasets. The `pols` data has `r nrow(pols)` observations and `r ncol(pols)` variables and tells us about the party affiliation distribution (democrat or republican) for governors and senators for a given year from years `r range(pols$year)[1]` to `r range(pols$year)[2]`. It also tells us whether the sitting president was a democrat or republican. The `snp` data has `r nrow(snp)` observations and `r ncol(snp)` variables, ranging from years `r range(snp$year)[1]` to `r range(snp$year)[2]`. The `unemployment` data has `r nrow(unemployment)` observations and `r ncol(unemployment)` variables ranging from years `r range(unemployment$year)[1]` to `r range(unemployment$year)[2]`. In Januarys in or after 1975 in which a democrat was president, the **average unemployment rate was `r filter(data_538, month == "January", year >= 1975, president == "dem") |> pull(unemployment) |> mean() |> round(2)`**.  The average unemployment rate over the same time period in which a republican was president was `r filter(data_538, month == "January", year >= 1975, president == "gop") |> pull(unemployment) |> mean() |> round(2)`.
+The `pols` data has `r nrow(pols)` observations and `r ncol(pols)` variables and tells us about the party affiliation distribution (democrat or republican) for governors and senators for a given year from years `r range(pols$year)[1]` to `r range(pols$year)[2]`. It also tells us whether the sitting president was a democrat or republican. The `snp` data has `r nrow(snp)` observations and `r ncol(snp)` variables, ranging from years `r range(snp$year)[1]` to `r range(snp$year)[2]`. The `unemployment` data has `r nrow(unemployment)` observations and `r ncol(unemployment)` variables ranging from years `r range(unemployment$year)[1]` to `r range(unemployment$year)[2]`. In Januarys in or after 1975 in which a democrat was president, the **average unemployment rate was `r filter(data_538, month == "January", year >= 1975, president == "dem") |> pull(unemployment) |> mean() |> round(2)`**.  The average unemployment rate over the same time period in which a republican was president was `r filter(data_538, month == "January", year >= 1975, president == "gop") |> pull(unemployment) |> mean() |> round(2)`.
 
 # Problem 2
 
@@ -77,9 +77,9 @@ mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Whe
   mutate(Month = tolower(Month))  # Convert month names to lowercase
 
 mr_trash_wheel <- mr_trash_wheel %>%
-  mutate(homes_powered = (Weight_tons * 1000) / 500 / 30)
-
-view(mr_trash_wheel)
+  mutate(
+    Year = as.integer(Year),
+    homes_powered = (Weight_tons * 1000) / 500 / 30)
 
 # Step 2: Import, clean, and organize data for Professor Trash Wheel
 professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Professor Trash Wheel") %>%
@@ -92,9 +92,9 @@ professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Profes
   mutate(Month = tolower(Month), Trash_Wheel = "Professor Trash Wheel")
 
 professor_trash_wheel <- professor_trash_wheel %>%
-  mutate(homes_powered = (Weight_tons * 1000) / 500 / 30)
-
-view(professor_trash_wheel)
+  mutate(
+    Year = as.integer(Year),
+    homes_powered = (Weight_tons * 1000) / 500 / 30)
 
 # Step 3: Import, clean, and organize data for Gwynnda
 gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel") %>%
@@ -108,12 +108,15 @@ gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel"
   mutate(Month = tolower(Month), Trash_Wheel = "Gwynnda")
 
 gwynnda <- gwynnda %>%
-  mutate(homes_powered = (Weight_tons * 1000) / 500 / 30)
+  mutate(
+    Year = as.integer(Year),
+    homes_powered = (Weight_tons * 1000) / 500 / 30)
 
-view(gwynnda)
 ```
 
 ```{r}
+# Step 4: Combine the datasets
+combined_data <- bind_rows(mr_trash_wheel, professor_trash_wheel, gwynnda)
 
 ```
 
