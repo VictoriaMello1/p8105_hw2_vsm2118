@@ -160,5 +160,28 @@ mci_amyloid <- mci_amyloid %>%
 
 ```{r}
 
+# Clean and tidy the demographic dataset
+demographics_clean <- MCI_baseline %>%
+  filter(!is.na(Age_Onset_MCI)) %>%
+  mutate(Gender = as.factor(Gender),
+         APOE4 = as.factor(APOE4))
+
+# Calculate the number of participants and those who develop MCI
+num_participants <- nrow(demographics_clean)
+num_mci <- sum(!is.na(demographics_clean$Age_Onset_MCI))
+
+# Convert "." to NA in the Age column
+demographics_clean$Age <- ifelse(demographics_clean$Age == ".", NA, demographics_clean$Age)
+
+demographics_clean <- demographics_clean %>%
+  mutate(Age = as.numeric(Age))
+
+# Calculate the average baseline age
+avg_baseline_age <- mean(demographics_clean$Age, na.rm = TRUE)
+
+# Calculate the proportion of female APOE4 carriers
+female_apoe4 <- demographics_clean$APOE4[demographics_clean$Gender == 1]
+prop_women_apoe4 <- sum(female_apoe4 == 1) / length(female_apoe4)
+
 ```
 
