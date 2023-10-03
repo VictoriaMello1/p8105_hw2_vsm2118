@@ -74,12 +74,12 @@ mr_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Mr. Trash Whe
     Cigarette_Butts = `Cigarette Butts`,
   ) %>%
   filter(!is.na(Dumpster)) %>%
-  mutate(Month = tolower(Month))  # Convert month names to lowercase
+  mutate(Month = tolower(Month))  
 
 mr_trash_wheel <- mr_trash_wheel %>%
   mutate(
     Year = as.integer(Year),
-    homes_powered = (Weight_tons * 1000) / 500 / 30)
+    homes_powered = (Weight_tons * 500) / 1000)
 
 # Step 2: Import, clean, and organize data for Professor Trash Wheel
 professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Professor Trash Wheel") %>%
@@ -94,7 +94,7 @@ professor_trash_wheel <- readxl::read_excel("./trashwheel.xlsx", sheet = "Profes
 professor_trash_wheel <- professor_trash_wheel %>%
   mutate(
     Year = as.integer(Year),
-    homes_powered = (Weight_tons * 1000) / 500 / 30)
+    homes_powered = (Weight_tons * 500) / 1000)
 
 # Step 3: Import, clean, and organize data for Gwynnda
 gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel") %>%
@@ -110,13 +110,17 @@ gwynnda <- readxl::read_excel("./trashwheel.xlsx", sheet = "Gwynnda Trash Wheel"
 gwynnda <- gwynnda %>%
   mutate(
     Year = as.integer(Year),
-    homes_powered = (Weight_tons * 1000) / 500 / 30)
+    homes_powered = (Weight_tons * 500) / 1000)
 
 ```
 
 ```{r}
 # Step 4: Combine the datasets
 combined_data <- bind_rows(mr_trash_wheel, professor_trash_wheel, gwynnda)
-
+view(combined_data)
 ```
+
+The resulting dataset has `r nrow(combined_data)` observations, which include data from Mr. Trash Wheel, Professor Trash Wheel, and Gwynnda. Some key variables in the dataset are Dumpster, Month, Year, Date, Weight_tons, Cigarette_Butts, and homes_powered. The total weight of trash collected by Professor Trash Wheel is `r sum(professor_trash_wheel$Weight_tons)` tons. In July of 2021, Gwynnda collected  `r sum(gwynnda$Cigarette_Butts[gwynnda$Month == "july" & gwynnda$Year == 2021])` cigarette butts.
+
+
 
