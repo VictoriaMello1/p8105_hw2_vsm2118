@@ -165,4 +165,39 @@ variables <- colnames(mci_amyloid)
 
 To import this data set I read in the csv file for the mci_amyloid data utilizing its relative path name with read_csv. The key features of this data set include patient ID number, and the time elapsed since the study baseline to the visit where the biomarker Amyloid ratio was measured at baseline as well as years 2, 4, 6, and 8. In cleaning the data set, individuals with missing values were removed and the column name of participant IDs was changed from “study_id” to “id” to match the “id” column name in the baseline data. The mci_amyloid dataset has `r num_rows` rows and `r num_columns` columns. The variables present in the dataset are `r paste(variables, collapse = ", ")`. The dataset has been reshaped from wide to long format, with the "time" column representing the time points and the "amyloid_value" column representing the corresponding amyloid values.
 
+```{r}
+mci_unique =
+  anti_join(mci_baseline_clean, mci_amyloid, by = "id")
 
+num_unique_participants <- nrow(mci_unique)
+unique_participants_summary <- mci_unique %>%
+  summarise(
+    num_females = sum(sex == "female"),
+    num_males = sum(sex == "male"),
+    num_carriers = sum(apoe4 == "carrier"),
+    num_non_carriers = sum(apoe4 == "non-carrier"),
+    num_with_age_at_onset = sum(age_at_onset != ".")
+  )
+
+```
+
+There are `r num_unique_participants` participants who appear in the mci_baseline_clean dataset but not in the mci_amyloid dataset. Among these participants, `r unique_participants_summary$num_females` are female and `r unique_participants_summary$num_males` are male. `r unique_participants_summary$num_carriers` of them are APOE4 carriers, while `r unique_participants_summary$num_non_carriers` are non-carriers. `r unique_participants_summary$num_with_age_at_onset` of these participants have age at onset information available.
+
+```{r}
+mci_combine =
+  inner_join(mci_baseline_clean, mci_amyloid, by = "id")
+
+mci_combine_dimensions <- dim(mci_combine)
+num_rows_combine <- mci_combine_dimensions[1]
+num_columns_combine <- mci_combine_dimensions[2]
+variables_combine <- colnames(mci_combine)
+
+```
+
+The mci_combine dataset, created by performing an inner join on the mci_baseline_clean and mci_amyloid datasets, has `r num_rows_combine` rows and `r num_columns_combine` columns. The variables present in the dataset are `r paste(variables_combine, collapse = ", ")`. This dataset contains the demographic and biomarker information for participants that appear in both the mci_baseline_clean and mci_amyloid datasets.
+
+```{r}
+# Export the result as a CSV
+write_csv(mci_combine, "./data_mci/mci_combine.csv")
+
+```
