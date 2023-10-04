@@ -142,7 +142,7 @@ mci_apoe_nc =
 
 ```
 
-The import process utilizes the read_csv() function to import the data so that it can be cleaned and manipulated accordingly. Ke features of this dataset include patient ID number, sex, APOE4 gene carrier status, and age of MCI onset for participants. There were originally 483 participants recruited and `r nrow(mci_baseline_clean)` of these participants were MCI free at baseline. The average baseline age is `r mean(pull(mci_baseline, current_age))` years old. `r (((sum(pull(mci_apoe_c, apoe4)))/((sum(pull(mci_apoe_nc, apoe4)))+(sum(pull(mci_apoe_c, apoe4)))))*100)` percent of women in the study are APOE4 carriers. 
+The import process utilizes the read_csv() function to import the data so that it can be cleaned and manipulated accordingly. Key features of this data set include patient ID number, sex, APOE4 gene carrier status, and age of MCI onset for participants. There were originally 483 participants recruited and `r nrow(mci_baseline_clean)` of these participants were MCI free at baseline. The average baseline age is `r mean(pull(mci_baseline, current_age))` years old. `r (((sum(pull(mci_apoe_c, apoe4)))/((sum(pull(mci_apoe_nc, apoe4)))+(sum(pull(mci_apoe_c, apoe4)))))*100)` percent of women in the study are APOE4 carriers. 
  
  
 ```{r}
@@ -163,7 +163,7 @@ num_columns <- mci_amyloid_dimensions[2]
 variables <- colnames(mci_amyloid)
 ```
 
-To import this data set I read in the csv file for the mci_amyloid data utilizing its relative path name with read_csv. The key features of this data set include patient ID number, and the time elapsed since the study baseline to the visit where the biomarker Amyloid ratio was measured at baseline as well as years 2, 4, 6, and 8. In cleaning the data set, individuals with missing values were removed and the column name of participant IDs was changed from “study_id” to “id” to match the “id” column name in the baseline data. The mci_amyloid dataset has `r num_rows` rows and `r num_columns` columns. The variables present in the dataset are `r paste(variables, collapse = ", ")`. The dataset has been reshaped from wide to long format, with the "time" column representing the time points and the "amyloid_value" column representing the corresponding amyloid values.
+To import this data set the csv file for the mci_amyloid data was read in with read_csv by utilizing its relative path name. The key features of this data set include patient ID number, and the time elapsed since the study baseline to the visit where the biomarker Amyloid ratio was measured at baseline as well as years 2, 4, 6, and 8. In cleaning the data set, individuals with missing values were removed and the column name of participant IDs was changed from “study_id” to “id” to match the “id” column name in the baseline data. The mci_amyloid dataset has `r num_rows` rows and `r num_columns` columns. The variables present in the dataset are `r paste(variables, collapse = ", ")`. The dataset has been reshaped from wide to long format, with the "time" column representing the time points and the "amyloid_value" column representing the corresponding amyloid values.
 
 ```{r}
 mci_unique =
