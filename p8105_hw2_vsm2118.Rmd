@@ -118,84 +118,51 @@ The collection of Mr. Trash Wheel datasets contains information about a water-wh
 
 ```{r}
 
-# Read the datasets
-MCI_baseline <- read_csv("./data_mci/MCI_baseline.csv")
-mci_amyloid <- read_csv("./data_mci/mci_amyloid.csv")
+# Read the dataset
+mci_baseline = read_csv("./data_mci/MCI_baseline.csv", skip = 1) %>% 
+    janitor::clean_names() 
 
-# Rename columns 
-MCI_baseline <- MCI_baseline %>%
-  rename(
-    `ID` = "...1",
-    `Age` = "Age at the study baseline",
-    `Gender` = "1 = Male, 0 = Female",
-    `Education` = "Years of education",
-    `APOE4` = "1 = APOE4 carrier, 0 = APOE4 non-carrier",
-    `Age_Onset_MCI` = "Age at the onset of MCI; missing if a subject remains MCI free during the follow-up period"
-  )
+mci_baseline_clean =
+  mci_baseline %>% 
+  mutate(sex = recode(sex, `1` = "male", `0`="female")) %>% 
+  mutate(apoe4 = recode(apoe4, `1`="carrier", `0`="non-carrier")) %>% 
+  filter(age_at_onset > current_age | age_at_onset == ".") 
 
-mci_amyloid <- mci_amyloid %>%
-  rename(
-    `ID` = "Study ID",
-    `Time_Elapsed` = "Time (in years) elapsed since the study baseline to the visit where biomarker Amyloid _ 42/40 ratio was measured",
-    `Time2` = "NA...3",
-    `Time4` = "NA...4",
-    `Time6` = "NA...5",
-    `Time8` = "NA...6"
-  )
+mci_apoe_c =
+  mci_baseline_clean %>% 
+  filter(sex == "female") %>% 
+  filter(apoe4 == "carrier") %>% 
+  mutate(apoe4 = recode(apoe4, "carrier" = 1))
+  
+mci_apoe_nc =
+  mci_baseline_clean %>% 
+  filter(sex == "female") %>% 
+  filter(apoe4 == "non-carrier") %>% 
+   mutate(apoe4 = recode(apoe4, "non-carrier" = 1))
 
 ```
 
+The import process utilizes the read_csv() function to import the data so that it can be cleaned and manipulated accordingly. Ke features of this dataset include patient ID number, sex, APOE4 gene carrier status, and age of MCI onset for participants. There were originally 483 participants recruited and `r nrow(mci_baseline_clean)` of these participants were MCI free at baseline. The average baseline age is `r mean(pull(mci_baseline, current_age))` years old. `r (((sum(pull(mci_apoe_c, apoe4)))/((sum(pull(mci_apoe_nc, apoe4)))+(sum(pull(mci_apoe_c, apoe4)))))*100)` percent of women in the study are APOE4 carriers. 
+ 
+ 
 ```{r}
-# Clean and tidy the demographic dataset
-demographics_clean <- MCI_baseline %>%
-  filter(Age_Onset_MCI != ".") %>%
-  mutate(Gender = as.factor(Gender),
-         APOE4 = as.factor(APOE4))
-
-# Calculate the number of participants and those who develop MCI
-num_participants <- nrow(demographics_clean)
-num_participants
-
-num_mci <- sum(!is.na(demographics_clean$Age_Onset_MCI))
-num_mci
-
-# Convert "." to NA in the Age column
-demographics_clean$Age <- ifelse(demographics_clean$Age == ".", NA, demographics_clean$Age)
-
-demographics_clean <- demographics_clean %>%
-  mutate(Age = as.numeric(Age))
-
-# Calculate the average baseline age
-avg_baseline_age <- mean(demographics_clean$Age, na.rm = TRUE)
-avg_baseline_age
-
-# Calculate the proportion of female APOE4 carriers
-female_apoe4 <- demographics_clean$APOE4[demographics_clean$Gender == 1]
-prop_women_apoe4 <- sum(female_apoe4 == 1) / length(female_apoe4)
-prop_women_apoe4
-
+# Reading in and cleaning the biomarker dataset
+mci_amyloid =
+  read_csv("./data_mci/mci_amyloid.csv", skip = 1) %>% 
+  janitor::clean_names() %>% 
+  rename("time_0" = baseline) %>%  
+  rename("id" = study_id) %>% 
+  pivot_longer(
+    time_0:time_8,
+    names_to = "time",
+    values_to = "amyloid_value") 
+ 
+mci_amyloid_dimensions <- dim(mci_amyloid)
+num_rows <- mci_amyloid_dimensions[1]
+num_columns <- mci_amyloid_dimensions[2]
+variables <- colnames(mci_amyloid)
 ```
 
-```{r}
-# Clean and tidy the biomarker dataset
-mci_amyloid_clean <- mci_amyloid %>%
-  gather(key = "Time", value = "Amyloid_Value", Time_Elapsed:Time8)
+To import this data set I read in the csv file for the mci_amyloid data utilizing its relative path name with read_csv. The key features of this data set include patient ID number, and the time elapsed since the study baseline to the visit where the biomarker Amyloid ratio was measured at baseline as well as years 2, 4, 6, and 8. In cleaning the data set, individuals with missing values were removed and the column name of participant IDs was changed from “study_id” to “id” to match the “id” column name in the baseline data. The mci_amyloid dataset has `r num_rows` rows and `r num_columns` columns. The variables present in the dataset are `r paste(variables, collapse = ", ")`. The dataset has been reshaped from wide to long format, with the "time" column representing the time points and the "amyloid_value" column representing the corresponding amyloid values.
 
-# Check for participants that appear in only one of the datasets
-participants_demographic <- unique(demographics_clean$ID)
-participants_amyloid <- unique(mci_amyloid_clean$ID)
-participants_only_demographic <- setdiff(participants_demographic, participants_amyloid)
-participants_only_amyloid <- setdiff(participants_amyloid, participants_demographic)
-
-print(participants_only_demographic)
-print(participants_only_amyloid)
-
-# Combine the demographic and biomarker datasets
-combined_data <- demographics_clean %>%
-  inner_join(mci_amyloid_clean, by = "ID")
-
-# Export the resulting dataset as a CSV file
-write_csv(combined_data, "./combined_data.csv")
-
-```
 
